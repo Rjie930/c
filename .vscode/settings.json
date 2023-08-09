@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "time.h": "c",
+        "unistd.h": "c",
+        "stdio.h": "c",
+        "cstdio": "c",
+        "signal.h": "c",
+        "fcntl.h": "c",
+        "types.h": "c",
+        "stat.h": "c",
+        "pthread.h": "c",
+        "errno.h": "c",
+        "time_types.h": "c",
+        "dirent.h": "c",
+        "pwd.h": "c",
+        "grp.h": "c",
+        "wait.h": "c",
+        "jpeglib.h": "c",
+        "head.h": "c",
+        "strings.h": "c",
+        "mman.h": "c"
+    }
+}
