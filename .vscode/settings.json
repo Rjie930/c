@@ -18,6 +18,7 @@
         "jpeglib.h": "c",
         "head.h": "c",
         "strings.h": "c",
-        "mman.h": "c"
+        "mman.h": "c",
+        "png.h": "c"
     }
 }

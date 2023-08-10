@@ -3,6 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
+                "/home/zz/lpng/include/",
+                "/home/zz/zlib/include/",
                 "${workspaceFolder}/**"
             ],
             "defines": [],

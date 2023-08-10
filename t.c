@@ -7,77 +7,78 @@
 #include <linux/input.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
-#include <string.h>
 #include <linux/fb.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <stdbool.h>
 
-int main(int argc, char const *argv[])
+// #include <cjson/cJSON.h>
+void show_png(char *path,int x,int y);
+void main(int argc,char **argv)
 {
-    int lcd = open("/dev/fb0", O_RDWR);
-    int tp = open("/dev/input/event0", O_RDWR);
+    for(int x=0,y=100;y<480;)
+    for(;x<600;x+=200,y+=100){
+    show_png(argv[1], x, y);
+    usleep(100000);}
+    // char buf[17*512];
+    // char buf_wea[100];
+    // int fd=open("wea.json",O_RDWR);
+    // int offset = lseek(fd,0,SEEK_END);
+    // lseek(fd,0,SEEK_SET);
+    // read(fd,buf,offset);
+    // // printf("%d\n",offset);
 
-    struct input_event buf;
-    struct fb_fix_screeninfo fixinfo;
-    struct fb_var_screeninfo varinfo;
-    if (ioctl(lcd, FBIOGET_FSCREENINFO, &fixinfo) != 0)
-    {
-        perror("get fix info fail");
-        return -1;
-    }
+    // // size_t realsize = size * nmemb;
+    // // printf("%s\n", (char *)contents);
+    // cJSON *json = cJSON_Parse(buf);
+    // cJSON *city =cJSON_GetObjectItem(json, "city");
+    // printf("city:%s\n",city->valuestring);
 
-    if (ioctl(lcd, FBIOGET_VSCREENINFO, &varinfo) != 0)
-    {
-        perror("get var info fail");
-        return -1;
-    }
+    // cJSON *wea =cJSON_GetObjectItem(json, "wea");
+    // printf("wea:%s\n",wea->valuestring);
 
-    int colors[] = {
-        0x00FF0000,
-        0x0000FF00,
-        0x000000FF,
-        0x00FF00FF,
-        0x00000,
-        0x00000,
-        0x00FF8EFF,
-        0x00DAA520,
-    };
-    int *p = mmap(NULL, 800 * 480 * 4 * 2, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
-    for (int i = 0; i < 800 * 480; i++)
-    {
-        p[i] = 0xffffff;
-    }
-    int x = 240, y = 400, i = 0;
-    while (1)
-    {
+    // cJSON *tem =cJSON_GetObjectItem(json, "tem");
+    // printf("tem:%s\n",tem->valuestring);
 
-        read(tp, &buf, sizeof(buf));
+    // cJSON *humidity =cJSON_GetObjectItem(json, "humidity");
+    // printf("humidity:%s\n",humidity->valuestring);
 
-        if (buf.type == EV_ABS)
-        {
-            buf.code==0?(x = buf.value * 800 / 1018):(y = buf.value * 480 / 592);
-            p[y * 800 - 1 + x] = colors[i];
-            p[y * 800 + x] = colors[i];
+    // cJSON *win =cJSON_GetObjectItem(json, "win");
+    // printf("win:%s\n",win->valuestring);
 
-            p[y * 800 + 800 - 1 + x] = colors[i];
-            p[y * 800 + 800 + x] = colors[i];
+    // cJSON *win_speed =cJSON_GetObjectItem(json, "win_speed");
+    // printf("win_speed:%s\n",win_speed->valuestring);
 
-        }
-        else if (buf.type == EV_KEY &&buf.code == BTN_TOUCH &&buf.value == 0)
-        {
-            i++;
-            if (i == 8)
-                i = 0;
-        }
-    }
+    // cJSON *air_tips =cJSON_GetObjectItem(json, "air_tips");
+    // printf("air_tips:%s\n",air_tips->valuestring);
 
-    close(lcd);
-    munmap(p, 800 * 400 * 4);
-    return 0;
+// char a[20];
+// char b[20];
+// char c[20];
+// char d[20];
+    // sprintf(buf_wea,"%s:%s\n温度:%s°,湿度:%s,%s,%s\n%s",city->valuestring ,wea->valuestring ,tem->valuestring, humidity->valuestring ,win->valuestring ,win_speed->valuestring, air_tips->valuestring);
+// char buf_wea[600]="生活小贴士:各类人群可多参加户外活动，多呼吸一下清新的空气。\r";
+//     sscanf(buf_wea,"city:%[^\r]:%stem:%shumidity:%s%",a,b,c,d);
+//         printf("1%s\n2%s\n3%s\n4%s\n", a,b,c,d);
+//         printf("%d\n", strlen(buf_wea));
+    // if (json)
+    // {
+    //     cJSON *data = cJSON_GetObjectItem(json, "data");
+    //     if (data)
+    //     {
+    //         cJSON *city = cJSON_GetObjectItem(data, "city");
+    //         cJSON *wea = cJSON_GetObjectItem(data, "wea");
+
+    //         if (city && wea)
+    //         {
+    //             printf("城市: %s\n天气: %s\n", city->valuestring, wea->valuestring);
+    //         }
+    //         else
+    //         {
+    //             printf("解析JSON出错\n");
+    //         }
+    //     }
+
+    //     cJSON_Delete(json);
+    // }
 }

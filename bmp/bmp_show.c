@@ -1,9 +1,9 @@
+#include <sys/types.h>
+#include <stdlib.h>
 #include <linux/fb.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <stdlib.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <unistd.h>
@@ -45,7 +45,7 @@ struct rgb_quad
 
 int main(int argc, char const *argv[])
 {
-    FILE *fp = fopen("1.bmp", "r");
+    FILE *fp = fopen(argv[1], "r");
     perror("");
     struct bitmap_header head;
     struct bitmap_info info;
