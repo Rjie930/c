@@ -19,6 +19,8 @@
         "head.h": "c",
         "strings.h": "c",
         "mman.h": "c",
-        "png.h": "c"
+        "png.h": "c",
+        "input.h": "c",
+        "stdlib.h": "c"
     }
 }

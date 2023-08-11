@@ -10,9 +10,11 @@ char buf_send[600];
 char buf_mesg[300];
 char buf_wea[200];
 char buf_tips[100];
+char buf_img[10];
+
 void write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
-
+    puts((char *)contents);
     cJSON *json = cJSON_Parse((char *)contents);
 
     if (json)
@@ -24,6 +26,8 @@ void write_callback(void *contents, size_t size, size_t nmemb, void *userp)
         cJSON *win = cJSON_GetObjectItem(json, "win");
         cJSON *win_speed = cJSON_GetObjectItem(json, "win_speed");
         cJSON *air_tips = cJSON_GetObjectItem(json, "air_tips");
+        cJSON *wea_img = cJSON_GetObjectItem(json, "wea_img");
+        strcpy(buf_img,wea_img->valuestring);
 
         sprintf(buf_wea,"%s:%s\n温度:%s度 湿度:%s\n风向:%s 风速:%s",city->valuestring ,wea->valuestring ,tem->valuestring, humidity->valuestring ,win->valuestring ,win_speed->valuestring);
         strcpy(buf_tips,air_tips->valuestring);
@@ -55,6 +59,9 @@ void getWea()
         }
         curl_easy_cleanup(curl);
     }
+    else{
+        printf("获取天气数据失败\n");
+    }
 }
 
 int main(int argc, char const *argv[])
@@ -81,7 +88,7 @@ int main(int argc, char const *argv[])
         getWea();
         printf("当前时间：%ld\n", rawTime);
 
-        sprintf(buf_send, "%ld %s %s %s", rawTime, buf_mesg, buf_tips,buf_wea);
+        sprintf(buf_send, "%s %ld %s %s %s", buf_img,rawTime, buf_mesg, buf_tips,buf_wea);
         sendto(sockfd, buf_send, strlen(buf_send), 0, (struct sockaddr *)&addr, sizeof(addr));
     }
     return 0;

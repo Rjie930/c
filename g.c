@@ -13,61 +13,63 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <pthread.h>
 
-#include <curl/curl.h>
-#include <cjson/cJSON.h>
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
+int ready = 0;
 
-size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-    size_t realsize = size * nmemb;
-    printf("%s\n",(char *)contents);
-    cJSON *json = cJSON_Parse((char *)contents);
-    
-    if (json) {
-    cJSON *city =cJSON_GetObjectItem(json, "city");
-    printf("city:%s\n",city->valuestring);
+void *thread_wait(void *arg) {
+    printf("sleep\n");
+    sleep(1);
+    printf("Waiting\n");
+    pthread_mutex_lock(&mutex);
+    // pthread_cond_wait(&cond, &mutex);
+    // pthread_mutex_unlock(&mutex);
 
-    cJSON *wea =cJSON_GetObjectItem(json, "wea");
-    printf("wea:%s\n",wea->valuestring);
+    printf("1111111111111111111!\n");
+    return NULL;
+}
 
-    cJSON *tem =cJSON_GetObjectItem(json, "tem");
-    printf("tem:%s\n",tem->valuestring);
+void *thread_notify(void *arg) {
+    printf("lock\n");
+    sleep(1);
+pthread_mutex_lock(&mutex);
+printf("lock\n");
+    sleep(1);
 
-    cJSON *humidity =cJSON_GetObjectItem(json, "humidity");
-    printf("humidity:%s\n",humidity->valuestring);
+    // pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+    printf("relaeas\n");
+    sleep(3);
 
-    cJSON *win =cJSON_GetObjectItem(json, "win");
-    printf("win:%s\n",win->valuestring);
+    // pthread_cond_signal(&cond);
+    return NULL;
+}
+void *thread_wait1(void *arg) {
+    printf("Waiting\n");
 
-    cJSON *win_speed =cJSON_GetObjectItem(json, "win_speed");
-    printf("win_speed:%s\n",win_speed->valuestring);
+    // /pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    // pthread_mutex_unlock(&mutex);
 
-    cJSON *air_tips =cJSON_GetObjectItem(json, "air_tips");
-    printf("air_tips:%s\n",air_tips->valuestring);
-        
-        cJSON_Delete(json);
-    }
-    
-    return realsize;
+    printf("2222222222222222222222\n");
+    return NULL;
 }
 
 int main() {
-    CURL *curl;
-    CURLcode res;
+    pthread_t wait_thread, notify_thread,wait_thread1;
 
-    curl = curl_easy_init();
-    if (curl) {
-        char url[] = "https://v0.yiketianqi.com/api?unescape=1&version=v63&appid=13833269&appsecret=23AJ0ebz";
+    // pthread_create(&wait_thread1, NULL, thread_wait1, NULL);
+    pthread_create(&wait_thread, NULL, thread_wait, NULL);
+    pthread_create(&notify_thread, NULL, thread_notify, NULL);
 
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    pthread_join(wait_thread, NULL);
+    pthread_join(notify_thread, NULL);
 
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        }
-
-        curl_easy_cleanup(curl);
-    }
+    pthread_cond_destroy(&cond);
 
     return 0;
 }

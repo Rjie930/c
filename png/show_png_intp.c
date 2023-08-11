@@ -6,22 +6,8 @@
 #include <string.h>
 #include <png.h>
 
-void show_png(char *path, int x, int y)
+void show_png(int*p,char *path, int x, int y)
 {
-    int lcd = open("/dev/fb0", O_RDWR);
-    if (lcd == -1)
-    {
-        perror("打开lcd失败");
-        exit(0);
-    }
-
-    int *p = mmap(NULL, 800 * 480 * 4, PROT_WRITE, MAP_SHARED, lcd, 0);
-    if (p == MAP_FAILED)
-    {
-        perror("内存映射失败");
-        exit(0);
-    }
-
     int width = 800;
     int height = 480;
 
@@ -96,7 +82,4 @@ void show_png(char *path, int x, int y)
         free(row_pointers[y]);
     }
     free(row_pointers);
-
-    close(lcd);
-    munmap(p, 800 * 480 * 4);
 }
