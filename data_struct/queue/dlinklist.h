@@ -1,5 +1,19 @@
 /*
  * @Author: vincent
+ * @Date: 2023-08-15 11:20:14
+ * @LastEditors: veincent
+ * @LastEditTime: 2023-08-15 11:20:16
+ * @Description: 
+ */
+/*
+ * @Author: vincent
+ * @Date: 2023-08-15 09:54:50
+ * @LastEditors: veincent
+ * @LastEditTime: 2023-08-15 09:54:51
+ * @Description: 
+ */
+/*
+ * @Author: vincent
  * @Date: 2023-08-11 00:57:15
  * @LastEditTime: 2023-08-14 02:40:27
  */
@@ -63,7 +77,7 @@ bool dlinklist_add_tail(dlinklist head, dlistnode *new)
 
 bool dlinklist_empty(dlinklist head)
 {
-    return head->prev == head->next;
+    return head->prev == head;
 }
 
 // 3. 向后遍历链表的所有结点

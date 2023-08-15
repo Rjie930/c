@@ -12,18 +12,87 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 
-// #include <cjson/cJSON.h>
-void show_png(int *p ,char *path, int x, int y);
+typedef struct node
+{
+    int data;
+    struct node *next;
+}node;
+
+node * new_node(int data)
+{
+    node *new = calloc(1, sizeof(node));
+    if(new != NULL)
+    {
+        new->data = data;
+        new->next = NULL; 
+    }
+    return new;
+}
+
+bool list_add(node *head, int data)
+{
+    node *new = new_node(data);
+    if(new == NULL)
+        return false;
+
+    new->next = head->next;
+    head->next = new;
+    return true;
+}
+
+node *init_linklist()
+{
+    node *new = calloc(1, sizeof(node));
+    if(new != NULL)
+    {
+        new->next = NULL;
+    }
+    return new;
+}
+
+bool is_empty(node *head)
+{
+    return head == NULL;
+}
+
+void show(node *head)
+{
+    if(is_empty(head))
+        return;
+
+    node *p;
+    for(p=head->next; p!=NULL; p=p->next)
+    {
+        printf("%d\t", p->data);
+    }
+    printf("\n");
+}
+
+void revert(node *head)
+{
+	node * p = head->next, *q;
+
+	head->next = NULL;
+
+	while(p){
+		q = p;
+		p = p->next;
+		q->next = head->next;
+		head->next = q;
+	}
+}
+
 void main(int argc, char **argv)
 {
-    int lcd = open("/dev/fb0", O_RDWR);
-    if (lcd == -1)
+    node *head=init_linklist();
+    for (int i = 0; i < 6; i++)
     {
-        perror("打开lcd失败");
-        exit(0);
+        list_add(head,i);
     }
-    int *p = mmap(NULL, 800 * 480 * 4, PROT_READ | PROT_WRITE, MAP_SHARED, lcd, 0);
-    show_png(p,argv[1], 200, 150);
-    close(lcd);
-    munmap(p, 480 * 800 * 4);
+    show(head);
+
+    printf("逆转：");
+    revert(head);
+
+    show(head);
 }

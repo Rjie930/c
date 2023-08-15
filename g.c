@@ -60,16 +60,16 @@ void *thread_wait1(void *arg) {
 }
 
 int main() {
-    pthread_t wait_thread, notify_thread,wait_thread1;
+    // pthread_t wait_thread, notify_thread,wait_thread1;
+    printf("%d\n",strlen("汉字"));
+    // // pthread_create(&wait_thread1, NULL, thread_wait1, NULL);
+    // pthread_create(&wait_thread, NULL, thread_wait, NULL);
+    // pthread_create(&notify_thread, NULL, thread_notify, NULL);
 
-    // pthread_create(&wait_thread1, NULL, thread_wait1, NULL);
-    pthread_create(&wait_thread, NULL, thread_wait, NULL);
-    pthread_create(&notify_thread, NULL, thread_notify, NULL);
+    // pthread_join(wait_thread, NULL);
+    // pthread_join(notify_thread, NULL);
 
-    pthread_join(wait_thread, NULL);
-    pthread_join(notify_thread, NULL);
+    // pthread_cond_destroy(&cond);
 
-    pthread_cond_destroy(&cond);
-
-    return 0;
+    // return 0;
 }

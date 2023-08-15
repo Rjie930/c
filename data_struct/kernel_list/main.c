@@ -5,59 +5,85 @@
 #include <string.h>
 #include "kernel_list.h"
 
-// 大结构体
-struct student
+// 设计包含内核标准结构体的用户节点
+typedef struct node // 大结构体
 {
-    char *name;
-    int age;
-
+    int data;
     struct list_head list; // 小结构体
-};
+}listnode, *linklist;
 
-struct student *init_list()
+linklist init_list()
 {
-    struct student *head = calloc(1, sizeof(struct student));
-    if (head != NULL)
+    linklist head = calloc(1, sizeof(listnode));
+    if(head != NULL)
     {
         INIT_LIST_HEAD(&head->list);
     }
     return head;
 }
 
+linklist new_node(int data)
+{
+    linklist new = calloc(1, sizeof(listnode));
+    if(new != NULL)
+    {
+        new->data = data;
+        INIT_LIST_HEAD(&new->list);
+    }
+    return new;
+}
+
+void show(linklist head)
+{
+    struct node *pos;
+    list_for_each_entry(pos, &head->list, list)
+    {
+        printf("%d ", pos->data);
+    }
+    printf("\n");
+}
+
 int main(int argc, char const *argv[])
 {
-    // 1. 搞一个空链表
-    struct student *head = init_list();
+    // 1. 搞一个空链表（带头节点）
+    linklist head = init_list();
 
-    // 2. 搞几个学生实例
-    struct student Jack = {"Jack", 21};
-    struct student Bill = {"Bill", 23};
-    struct student Rose = {"Rose", 18};
+    // 2. 将n个自然数依次插入链表末尾 1 2 3 4 5...n
+    int n;
+    scanf("%d", &n);
 
-    // 3. 将以上结点依次放入链表表尾
-    list_add_tail(&Jack.list, &head->list);
-    list_add_tail(&Bill.list, &head->list);
-    list_add_tail(&Rose.list, &head->list);
-
-    // 4. 遍历链表
-    struct list_head *pos;
-    struct list_head *n;
-    list_for_each(pos, &head->list)
+    for(int i=1; i<=n; i++)
     {
-        printf("姓名：%s\t", list_entry(pos, struct student, list)->name);
-        printf("年龄：%d\n", list_entry(pos, struct student, list)->age);
-    }
+        // 2.1 搞一个新节点
+        linklist new = new_node(i);
 
-    list_for_each_safe(pos,n, &head->list)
-    {
-        if (strcmp(list_entry(pos, struct student, list)->name, "Bill") == 0)
-        list_del(pos);
+        // 2.2 将新节点插入链表末尾
+        list_add_tail(&new->list, &head->list);
     }
+    show(head);
 
+    // 3. 奇偶数重排
+    struct list_head *pos, *q = head->list.prev; // 让q指向链表的末尾节点中的小结构体;
+    struct node *p;
     list_for_each_prev(pos, &head->list)
     {
-        printf("姓名：%s\t", list_entry(pos, struct student, list)->name);
-        printf("年龄：%d\n", list_entry(pos, struct student, list)->age);
+        // 大结构体指针  小结构体指针  大结构体类型  小结构体在用户节点中的名字
+              p = list_entry(pos,      struct node,          list);
+
+        if(p->data%2 == 0) // 偶数，一律移动到链表的末尾
+        {
+            list_move_tail(pos, &head->list);
+            pos = q;
+        }
+
+        else // 奇数，记录下当前位置
+        {
+            q = pos;
+        }
     }
+    show(head);
+
+
     return 0;
 }
+

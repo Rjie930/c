@@ -1,5 +1,19 @@
 /*
  * @Author: vincent
+ * @Date: 2023-08-15 10:20:31
+ * @LastEditors: veincent
+ * @LastEditTime: 2023-08-15 10:49:06
+ * @Description: 
+ */
+/*
+ * @Author: vincent
+ * @Date: 2023-08-15 09:54:50
+ * @LastEditors: veincent
+ * @LastEditTime: 2023-08-15 09:54:51
+ * @Description: 
+ */
+/*
+ * @Author: vincent
  * @Date: 2023-08-11 00:57:15
  * @LastEditTime: 2023-08-14 02:40:27
  */
@@ -51,6 +65,18 @@ dlistnode * dlinklist_newnode(datatype data)
     return new;
 }
 
+
+// 2. 头插法添加新节点
+bool dlinklist_add(dlinklist head, dlistnode *new)
+{
+    new->prev = head;
+    new->next = head->next;
+    head->next = new;
+    new->next->prev = new;
+    return true;
+}
+
+
 // 2. 尾插法添加新节点
 bool dlinklist_add_tail(dlinklist head, dlistnode *new)
 {
@@ -63,7 +89,7 @@ bool dlinklist_add_tail(dlinklist head, dlistnode *new)
 
 bool dlinklist_empty(dlinklist head)
 {
-    return head->prev == head->next;
+    return head->prev == head;
 }
 
 // 3. 向后遍历链表的所有结点
