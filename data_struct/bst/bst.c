@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+#include "../queue/queue.h"
 // 设计树节点
 typedef struct node
 {
@@ -114,6 +115,13 @@ void pos_travel2(linktree root)
     printf("%d ", root->data);
 }
 
+void level_travel2(linktree root)
+{
+    linkqueue q=init_queue();
+
+    en_queue(q,root);
+}
+
 int main(int argc, char const *argv[])
 {
     // 1. 搞一个空树
@@ -143,12 +151,22 @@ int main(int argc, char const *argv[])
     }
 
     // 使用各种遍历算法打印节点
+    printf("前："); // 前
     pre_travel2(root);
     printf("\n"); // 前
+
+    printf("中："); 
     mid_travel2(root);
     printf("\n"); // 中
+
+    printf("后："); 
     pos_travel2(root);
+    printf("\n"); // 后
+
+    printf("层："); 
+    level_travel2(root);
     printf("\n"); // 后
 
     return 0;
 }
+
