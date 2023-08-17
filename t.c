@@ -16,15 +16,15 @@ typedef struct node
 {
     int data;
     struct node *next;
-}node;
+} node;
 
-node * new_node(int data)
+node *new_node(int data)
 {
     node *new = calloc(1, sizeof(node));
-    if(new != NULL)
+    if (new != NULL)
     {
         new->data = data;
-        new->next = NULL; 
+        new->next = NULL;
     }
     return new;
 }
@@ -32,7 +32,7 @@ node * new_node(int data)
 bool list_add(node *head, int data)
 {
     node *new = new_node(data);
-    if(new == NULL)
+    if (new == NULL)
         return false;
 
     new->next = head->next;
@@ -43,7 +43,7 @@ bool list_add(node *head, int data)
 node *init_linklist()
 {
     node *new = calloc(1, sizeof(node));
-    if(new != NULL)
+    if (new != NULL)
     {
         new->next = NULL;
     }
@@ -57,11 +57,11 @@ bool is_empty(node *head)
 
 void show(node *head)
 {
-    if(is_empty(head))
+    if (is_empty(head))
         return;
 
     node *p;
-    for(p=head->next; p!=NULL; p=p->next)
+    for (p = head->next; p != NULL; p = p->next)
     {
         printf("%d\t", p->data);
     }
@@ -70,24 +70,25 @@ void show(node *head)
 
 void revert(node *head)
 {
-	node * p = head->next, *q;
+    node *p = head->next, *q;
 
-	head->next = NULL;
+    head->next = NULL;
 
-	while(p){
-		q = p;
-		p = p->next;
-		q->next = head->next;
-		head->next = q;
-	}
+    while (p)
+    {
+        q = p;
+        p = p->next;
+        q->next = head->next;
+        head->next = q;
+    }
 }
 
 void main(int argc, char **argv)
 {
-    node *head=init_linklist();
+    node *head = init_linklist();
     for (int i = 0; i < 6; i++)
     {
-        list_add(head,i);
+        list_add(head, i);
     }
     show(head);
 
