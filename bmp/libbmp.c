@@ -47,7 +47,11 @@ void show_bmp(char const * image_path,char *p,int xyoffset)
 {
     p+=800*480*4*xyoffset;
     FILE *fp = fopen(image_path, "r");
-    perror("");
+        if (!fp)
+    {
+        perror("无法打开bmp文件");
+        exit(0);
+    }
     struct bitmap_header head;
     struct bitmap_info info;
     struct rgb_quad quad;
@@ -59,6 +63,11 @@ void show_bmp(char const * image_path,char *p,int xyoffset)
     int width = info.width;
     int height = info.height;
     int bpp = info.bit_count;
+        
+    // 6，获取图片的尺寸信息
+    printf("宽：  %d\n", width );
+    printf("高：  %d\n", height );
+    printf("色深：%d\n", bpp );
 
     int pad = (4 - (width * bpp / 8) % 4) % 4;
 
@@ -72,7 +81,6 @@ void show_bmp(char const * image_path,char *p,int xyoffset)
     int zoom = 1;
     if (height > 480 || width > 800)
         zoom = (height / 480 + 1 > width / 800 + 1) ? height / 480 + 1 : width / 800 + 1;
-    printf("%d\n", zoom);
 
     for (int j = 0; j < height && j < height / zoom; j++)
     {

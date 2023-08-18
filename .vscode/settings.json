@@ -25,6 +25,7 @@
         "linklist.h": "c",
         "typeinfo": "c",
         "*.tcc": "c",
-        "fstream": "c"
+        "fstream": "c",
+        "kernel_list.h": "c"
     }
 }

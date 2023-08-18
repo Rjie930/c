@@ -16,7 +16,9 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include "data_struct/kernel_list/kernel_list.h"
+#include "font.h"
 
+int done;
 typedef struct node
 {
     char img_path[50];
@@ -51,57 +53,6 @@ void show(linklist head)
     {
         printf("%s\n", pos->img_path);
     }
-}
-
-void getImg(char *src, linklist head)
-{
-    DIR *dp = opendir(src);
-    // printf("cd %s\n", src);
-    chdir(src);
-
-    struct dirent *ep;
-    struct stat entry_desfo;
-    char entry_src[100];
-    char entry_des[100];
-    bzero(entry_src, 100);
-
-    ep = readdir(dp);
-    while (ep != NULL)
-    {
-        while (ep != NULL && (!strcmp(ep->d_name, ".") | !strcmp(ep->d_name, "..")))
-            ep = readdir(dp);
-
-        if (ep == NULL)
-        {
-            break;
-        }
-
-        stat(ep->d_name, &entry_desfo);
-        getcwd(entry_src, 100);
-
-        sprintf(entry_src, "%s/%s", src, ep->d_name);
-
-        if (S_ISDIR(entry_desfo.st_mode))
-        {
-            // printf("entry dir: %s\n", ep->d_name);
-            getImg(entry_src, head);
-            chdir("..");
-        }
-        else
-        {
-            if (strstr(entry_src, ".png") || strstr(entry_src, ".jpg") || strstr(entry_src, ".bmp"))
-            {
-                // printf("file: %s\n", entry_src);
-                linklist new = new_node(entry_src);
-                list_add_tail(&new->list, &head->list);
-                printf("%s\n", entry_src);
-            }
-        }
-        ep = readdir(dp);
-    }
-    // printf("cd %s\n", "..");
-    closedir(dp);
-    printf("getImg done\n");
 }
 
 int get_xy_s(int *x, int *y)
@@ -172,10 +123,78 @@ void load_image(linklist pos, char *p, int xyoffset)
         show_png(pos->img_path, p, xyoffset);
     printf("load:%s\n", pos->img_path);
 }
+linklist head;
 
-int main()
+void *getImg(void *arg)
 {
-    linklist head = init_list();
+    char *src=(char*)arg;
+    DIR *dp = opendir(src);
+    // printf("cd %s\n", src);
+    chdir(src);
+
+    struct dirent *ep;
+    struct stat entry_desfo;
+    char entry_src[100];
+    char entry_des[100];
+    bzero(entry_src, 100);
+
+    ep = readdir(dp);
+    while (ep != NULL)
+    {
+        while (ep != NULL && (!strcmp(ep->d_name, ".") | !strcmp(ep->d_name, "..")))
+            ep = readdir(dp);
+
+        if (ep == NULL)
+        {
+            break;
+        }
+
+        stat(ep->d_name, &entry_desfo);
+        getcwd(entry_src, 100);
+
+        sprintf(entry_src, "%s/%s", src, ep->d_name);
+
+        if (S_ISDIR(entry_desfo.st_mode))
+        {
+            // printf("entry dir: %s\n", ep->d_name);
+            getImg((void*)entry_src);
+            chdir("..");
+        }
+        else
+        {
+            if (strstr(entry_src, ".png") || strstr(entry_src, ".jpg") || strstr(entry_src, ".bmp"))
+            {
+                // printf("file: %s\n", entry_src);
+                linklist new = new_node(entry_src);
+                list_add_tail(&new->list, &head->list);
+                printf("%s\n", entry_src);
+            }
+        }
+        ep = readdir(dp);
+    }
+    // printf("cd %s\n", "..");
+    closedir(dp);
+}
+
+void showbitmap(bitmap *bm, int x, int y, char *p)
+{
+    p += x*4 + y * 800*4;
+    for (int j = 0; j < bm->height; j++)
+    {
+        for (int i = 0; i < bm->width; i++)
+            memcpy(p + i*4 + 800 * j*4, bm->map + i * 4 + bm->width * j * 4, 4);
+    }
+
+    // bzero(bm->map, bm->width * bm->height * bm->byteperpixel);
+}
+
+int main(int argc,char **argv)
+{
+    head = init_list();
+    pthread_t thread_getImg;
+    pthread_create(&thread_getImg,NULL,getImg,(void*)argv[1]);
+
+    
     int lcd = open("/dev/fb0", O_RDWR);
     char *p = mmap(NULL, 800 * 480 * 4 * 3, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
 
@@ -187,9 +206,25 @@ int main()
         return -1;
     }
 
-    // 递归遍历指定目录
-    getImg("/root/zz/c", head);
 
+    font *f1 = fontLoad("simfang.ttf");
+    fontSetSize(f1, 55);
+    bitmap *Lwho;
+    Lwho = createBitmapWithInit(800, 60, 4, black);
+    fontPrint(f1, Lwho, 530, 0, "--粤嵌科技", yellow, 0);
+    showbitmap(Lwho, 0, 420, p);
+    // 递归遍历指定目录
+    // getImg("/root/zz/c", head);
+    while (1)
+    {
+        if(pthread_tryjoin_np(thread_getImg, NULL)==0);
+        {
+            break;
+        }
+        printf("wait~\n");
+        usleep(100000);
+    }
+    
     // 分别加载三张图片到显存
     linklist pos = list_entry(&(head->list), typeof(*pos), list);
     for (int i = 0; i < 3; i++)

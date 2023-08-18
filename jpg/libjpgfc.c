@@ -48,10 +48,9 @@ char *jpg2rgb(const char *jpgdata, size_t jpgsize, int *img_width, int *img_heig
     jpeg_start_decompress(&cinfo);
 
     // 6，获取图片的尺寸信息
-    printf("宽：  %d\n", *img_width = cinfo.output_width);
-    printf("高：  %d\n", *img_height = cinfo.output_height);
-    printf("色深：%d\n", *img_bpp = cinfo.output_components);
-
+*img_width = cinfo.output_width;
+*img_height = cinfo.output_height;
+*img_bpp = cinfo.output_components;
     // 7，根据图片的尺寸大小，分配一块相应的内存rgbdata
     //    用来存放从jpgdata解码出来的图像数据
     unsigned long linesize = cinfo.output_width * cinfo.output_components;
@@ -111,6 +110,11 @@ void show_jpg(char const *image_path,char *p,int xyoffset)
 
     char *RGB = jpg2rgb(jpgdata, jpgInfo.st_size, &img_width, &img_height, &img_bpp);
 
+    // 6，获取图片的尺寸信息
+    printf("宽：  %d\n", img_width );
+    printf("高：  %d\n", img_height );
+    printf("色深：%d\n", img_bpp );
+    
     int lcd_offset;
     int rgb_offset;
     int zoom = 1;
