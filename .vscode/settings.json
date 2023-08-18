@@ -22,6 +22,9 @@
         "png.h": "c",
         "input.h": "c",
         "stdlib.h": "c",
-        "linklist.h": "c"
+        "linklist.h": "c",
+        "typeinfo": "c",
+        "*.tcc": "c",
+        "fstream": "c"
     }
 }

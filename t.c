@@ -1,99 +1,252 @@
-#include <unistd.h>
 #include <errno.h>
-#include <string.h>
 #include <time.h>
-#include <sys/mman.h>
-#include <sys/ioctl.h>
 #include <linux/input.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <linux/fb.h>
 #include <fcntl.h>
+#include <linux/fb.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <dlfcn.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <pthread.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include "data_struct/kernel_list/kernel_list.h"
 
 typedef struct node
 {
-    int data;
-    struct node *next;
-} node;
+    char img_path[50];
+    struct list_head list;
+} listnode, *linklist;
 
-node *new_node(int data)
+linklist init_list()
 {
-    node *new = calloc(1, sizeof(node));
+    linklist head = calloc(1, sizeof(listnode));
+    if (head != NULL)
+    {
+        INIT_LIST_HEAD(&head->list);
+    }
+    return head;
+}
+
+linklist new_node(char *img_path)
+{
+    linklist new = calloc(1, sizeof(listnode));
     if (new != NULL)
     {
-        new->data = data;
-        new->next = NULL;
+        strcpy(new->img_path, img_path);
+        INIT_LIST_HEAD(&new->list);
     }
     return new;
 }
 
-bool list_add(node *head, int data)
+void show(linklist head)
 {
-    node *new = new_node(data);
-    if (new == NULL)
-        return false;
-
-    new->next = head->next;
-    head->next = new;
-    return true;
-}
-
-node *init_linklist()
-{
-    node *new = calloc(1, sizeof(node));
-    if (new != NULL)
+    struct node *pos;
+    list_for_each_entry(pos, &head->list, list)
     {
-        new->next = NULL;
-    }
-    return new;
-}
-
-bool is_empty(node *head)
-{
-    return head == NULL;
-}
-
-void show(node *head)
-{
-    if (is_empty(head))
-        return;
-
-    node *p;
-    for (p = head->next; p != NULL; p = p->next)
-    {
-        printf("%d\t", p->data);
-    }
-    printf("\n");
-}
-
-void revert(node *head)
-{
-    node *p = head->next, *q;
-
-    head->next = NULL;
-
-    while (p)
-    {
-        q = p;
-        p = p->next;
-        q->next = head->next;
-        head->next = q;
+        printf("%s\n", pos->img_path);
     }
 }
 
-void main(int argc, char **argv)
+void getImg(char *src, linklist head)
 {
-    node *head = init_linklist();
-    for (int i = 0; i < 6; i++)
+    DIR *dp = opendir(src);
+    // printf("cd %s\n", src);
+    chdir(src);
+
+    struct dirent *ep;
+    struct stat entry_desfo;
+    char entry_src[100];
+    char entry_des[100];
+    bzero(entry_src, 100);
+
+    ep = readdir(dp);
+    while (ep != NULL)
     {
-        list_add(head, i);
+        while (ep != NULL && (!strcmp(ep->d_name, ".") | !strcmp(ep->d_name, "..")))
+            ep = readdir(dp);
+
+        if (ep == NULL)
+        {
+            break;
+        }
+
+        stat(ep->d_name, &entry_desfo);
+        getcwd(entry_src, 100);
+
+        sprintf(entry_src, "%s/%s", src, ep->d_name);
+
+        if (S_ISDIR(entry_desfo.st_mode))
+        {
+            // printf("entry dir: %s\n", ep->d_name);
+            getImg(entry_src, head);
+            chdir("..");
+        }
+        else
+        {
+            if (strstr(entry_src, ".png") || strstr(entry_src, ".jpg") || strstr(entry_src, ".bmp"))
+            {
+                // printf("file: %s\n", entry_src);
+                linklist new = new_node(entry_src);
+                list_add_tail(&new->list, &head->list);
+                printf("%s\n", entry_src);
+            }
+        }
+        ep = readdir(dp);
     }
-    show(head);
+    // printf("cd %s\n", "..");
+    closedir(dp);
+    printf("getImg done\n");
+}
 
-    printf("逆转：");
-    revert(head);
+int get_xy_s(int *x, int *y)
+{
+    int ty, tx;
+    int fd = open("/dev/input/event0", O_RDWR);
+    if (fd < 0)
+    {
+        perror("open touch fail:");
+        return -1;
+    }
+    while (1)
+    {
+        struct input_event xy;
+        while (1)
+        {
+            read(fd, &xy, sizeof(xy));
+            if (xy.type == EV_ABS)
+            {
+                xy.code == REL_X ? (*x = xy.value * 800 / 1020) : (*y = xy.value * 480 / 592);
+                // printf("(%d,%d)\n", *x, *y);
+            }
+            if (xy.type == EV_KEY && xy.code == BTN_TOUCH)
+            {
+                // printf("touch %d\n",xy.value);
+                if (xy.value == 1)
+                {
+                    // printf("press\n");
+                    tx = *x;
+                    ty = *y;
+                }
+                if (xy.value == 0)
+                {
+                    // printf("up\n");
+                    // 左
+                    if ((*x - tx < -50))
+                        return 1;
+                    // 右
+                    if ((*x - tx > 50))
+                        return 2;
+                    // 上
+                    if (*y - ty < -50)
+                        return 3;
+                    // 下
+                    if (*y - ty > 50)
+                        return 4;
+                    // printf("%s%s\n", (x - tx == 0) ? "" : (x - tx < 0) ? "左": "右",(y - ty == 0) ? "" : (y - ty < 0) ? "上" : "下");
+                    return 0;
+                }
+            }
+        }
+    }
+    close(fd);
+}
 
-    show(head);
+void show_jpg(char const *image_path, char *p, int xyoffse);
+void show_bmp(char const *image_path, char *p, int xyoffse);
+void show_png(char const *image_path, char *p, int xyoffse);
+
+void load_image(linklist pos, char *p, int xyoffset)
+{
+    memset(p + xyoffset * 800 * 480 * 4, 0, 800 * 480 * 4);
+    if (strstr(pos->img_path, ".jpg"))
+        show_jpg(pos->img_path, p, xyoffset);
+    else if (strstr(pos->img_path, ".bmp"))
+        show_bmp(pos->img_path, p, xyoffset);
+    else if (strstr(pos->img_path, ".png"))
+        show_png(pos->img_path, p, xyoffset);
+    printf("load:%s\n", pos->img_path);
+}
+
+int main()
+{
+    linklist head = init_list();
+    int lcd = open("/dev/fb0", O_RDWR);
+    char *p = mmap(NULL, 800 * 480 * 4 * 3, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
+
+    // 获取lcd屏幕信息
+    struct fb_var_screeninfo varinfo;
+    if (ioctl(lcd, FBIOGET_VSCREENINFO, &varinfo) != 0)
+    {
+        perror("get var info fail");
+        return -1;
+    }
+
+    // 递归遍历指定目录
+    getImg("/root/zz/c", head);
+
+    // 分别加载三张图片到显存
+    linklist pos = list_entry(&(head->list), typeof(*pos), list);
+    for (int i = 0; i < 3; i++)
+    {
+        pos = list_entry(pos->list.next, typeof(*pos), list);
+        load_image(pos, p, i);
+    }
+    pos = list_entry(pos->list.prev, typeof(*pos), list);
+
+    int bg = 0x0;
+    int i = 0, x, y, s;
+    int block = 0;
+    int now = 0, prev = 1, next = 2, tmp_now, tmp_prev;
+    varinfo.xoffset = 0;
+    while (1)
+    {
+        s = get_xy_s(&x, &y);
+        if (s == 1)
+        {
+            // 左、next
+            pos = list_entry(pos->list.next->next, typeof(*pos), list);
+            if (pos == head)
+                pos = list_entry(pos->list.next, typeof(*pos), list);
+            printf("%s\n", pos->img_path);
+
+            //更新三个显存的位置
+            tmp_now = now;
+            now = next;
+            next = prev;
+            prev = tmp_now;
+            varinfo.yoffset = now * varinfo.yres;
+            ioctl(lcd, FBIOPAN_DISPLAY, &varinfo);
+            load_image(pos, p, next);
+            pos = list_entry(pos->list.prev, typeof(*pos), list);
+        }
+        else if (s == 2)
+        {
+            // 右、prev
+            pos = list_entry(pos->list.prev->prev, typeof(*pos), list);
+            if (pos == head)
+                pos = list_entry(pos->list.prev, typeof(*pos), list);
+            printf("%s\n", pos->img_path);
+            tmp_now = now;
+            now = prev;
+            prev = next;
+            next = tmp_now;
+            varinfo.yoffset = now * varinfo.yres;
+            ioctl(lcd, FBIOPAN_DISPLAY, &varinfo);
+            load_image(pos, p, prev);
+            pos = list_entry(pos->list.next, typeof(*pos), list);
+        }
+        else if (s == 3)//退出程序
+        {
+            memset(p + 800 * 480 * 4 * now, 0, 800 * 480 * 4);
+            break;
+        }
+    }
+    close(lcd);
+    munmap(p, 800 * 400 * 4 * 3);
 }

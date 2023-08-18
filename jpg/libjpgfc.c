@@ -74,15 +74,15 @@ char *jpg2rgb(const char *jpgdata, size_t jpgsize, int *img_width, int *img_heig
     return rgbdata;
 }
 
-void show_image(char const *image_path)
+void show_jpg(char const *image_path,char *p,int xyoffset)
 {
+    p+=xyoffset*800*480*4;
     if (image_path==NULL)
     {
         printf("指定一张jpeg图片、你");
         exit(0);
     }
 
-    int lcd = open("/dev/fb0", O_RDWR);
     FILE *fp = fopen(image_path, "r");
 
     struct stat jpgInfo;
@@ -111,7 +111,6 @@ void show_image(char const *image_path)
 
     char *RGB = jpg2rgb(jpgdata, jpgInfo.st_size, &img_width, &img_height, &img_bpp);
 
-    char *p = mmap(NULL, 800 * 480 * 4, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
     int lcd_offset;
     int rgb_offset;
     int zoom = 1;
@@ -128,7 +127,14 @@ void show_image(char const *image_path)
             memcpy(p + lcd_offset + 2 + 4 * i, RGB + rgb_offset + 0 + 3 * i* zoom, 1);
         }
     }
-    close(lcd);
     fclose(fp);
-    munmap(p, 800 * 400 * 4);
 }
+// int main(int argc, char const *argv[])
+// {
+//     int lcd = open("/dev/fb0", O_RDWR);
+//     char *p = mmap(NULL, 800 * 480 * 4, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
+//     show_jpg("off.jpg",p,0);
+//     close(lcd);
+//     munmap(p, 800 * 400 * 4);
+//     return 0;
+// }

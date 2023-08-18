@@ -100,3 +100,12 @@ void show_png(char *path, int x, int y)
     close(lcd);
     munmap(p, 800 * 480 * 4);
 }
+// int main(int argc, char const *argv[])
+// {
+//     int lcd = open("/dev/fb0", O_RDWR);
+//     char *p = mmap(NULL, 800 * 480 * 4, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
+//     show_png("yahoo/lei.png",0,0);
+//     close(lcd);
+//     munmap(p, 800 * 400 * 4);
+//     return 0;
+// }

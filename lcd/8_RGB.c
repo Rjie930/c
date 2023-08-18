@@ -62,7 +62,7 @@ int main(int argc, char const *argv[])
             for (int x = 0; x < 800; x++)
             {
                 p[y * 800 + x + screen_size / 4 * (j % 2)] = colors[(x / 200 + j) % 8];
-        p[y * 800 + 240*800+x + screen_size / 4 * (j % 2)] = colors[(7-(x / 200 ) +j)% 8];
+                p[y * 800 + 240 * 800 + x + screen_size / 4 * (j % 2)] = colors[(7 - (x / 200) + j) % 8];
             }
         j++;
         sleep(1);

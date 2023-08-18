@@ -43,8 +43,9 @@ struct rgb_quad
     int8_t reserved;
 } __attribute__((packed));
 
-void show_image(char const * image_path)
+void show_bmp(char const * image_path,char *p,int xyoffset)
 {
+    p+=800*480*4*xyoffset;
     FILE *fp = fopen(image_path, "r");
     perror("");
     struct bitmap_header head;
@@ -65,12 +66,6 @@ void show_image(char const * image_path)
 
     fread(rgb, (width * bpp / 8 + pad) * height, 1, fp);
 
-    int lcd = open("/dev/fb0", O_RDWR);
-    if (lcd == -1)
-        perror("");
-
-    char *p = mmap(NULL, 800 * 480 * 4, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
-
     char *tmp = rgb + (width * bpp / 8 + pad) * (height - 1);
     int lcd_offset = 0;
     int rgb_offset = 0;
@@ -84,10 +79,8 @@ void show_image(char const * image_path)
         lcd_offset = 800 * 4 * j + (480 - height / zoom) / 2 * 800 * 4 + (800 - width / zoom) * 2;
         rgb_offset = (width * bpp / 8 + pad) * j * zoom;
         for (int i = 0; i < width && i < width / zoom; i++)
-            memcpy(p + lcd_offset + 4 * i, rgb + rgb_offset + 3 * i * zoom, 3);
+            memcpy(p + lcd_offset + 4 * i, tmp - rgb_offset + 3 * i * zoom, 3);
     }
-    close(lcd);
     fclose(fp);
-    munmap(p, 800 * 400 * 4);
     free(rgb);
 }
