@@ -184,7 +184,6 @@ void showbitmap(bitmap *bm, int x, int y, char *p)
         for (int i = 0; i < bm->width; i++)
             memcpy(p + i*4 + 800 * j*4, bm->map + i * 4 + bm->width * j * 4, 4);
     }
-
     // bzero(bm->map, bm->width * bm->height * bm->byteperpixel);
 }
 

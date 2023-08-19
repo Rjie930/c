@@ -1,44 +1,13 @@
-alarm
-android_adb
-ashmem
-audio
-audio1
-autofs
-binder
-bus
-console
-cpu_dma_latency
-dsp
-dsp1
-fb0
-full
-fuse
-gec6818_adc
-hdmi-cec
-i2c-0
-i2c-1
-i2c-2
-i2c-3
-iio:device0
-input
-ion
-keychord
-kmem
-kmsg
-lirc0
-log_events
-log_main
-log_radio
-log_system
-loop-control
-loop0
-loop1
-loop2
-loop3
-loop4
-loop5
-loop6
-loop7
-mapper
-media0
+808464433
 
+
+808464688
+
+
+808529968
+825241648
+
+                  0 00110001
+                  1 00110000
+         10011000 
+10011000          

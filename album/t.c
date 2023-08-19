@@ -17,15 +17,14 @@
 #include <sys/types.h>
 #include "../data_struct/kernel_list/kernel_list.h"
 #include "font.h"
-int red = 0xff000000;
-int black = 0x0;
-int done;
+
+static int recursion = 0;
 typedef struct node
 {
-    char img_path[50];
+    char img_path[150];
     struct list_head list;
 } listnode, *linklist;
-
+linklist head;
 linklist init_list()
 {
     linklist head = calloc(1, sizeof(listnode));
@@ -124,12 +123,10 @@ void load_image(linklist pos, char *p, int xyoffset)
     else if (strstr(pos->img_path, ".png"))
         show_png(pos->img_path, p, xyoffset);
 }
-linklist head;
 
-void *getImg(void *arg)
+void searchImg(char *src)
 {
     static int sum;
-    char *src=(char*)arg;
     DIR *dp = opendir(src);
     // printf("cd %s\n", src);
     chdir(src);
@@ -159,8 +156,17 @@ void *getImg(void *arg)
         if (S_ISDIR(entry_desfo.st_mode))
         {
             // printf("entry dir: %s\n", ep->d_name);
-            getImg((void*)entry_src);
-            chdir("..");
+            if (recursion == 1)
+            {
+                searchImg(entry_src);
+                chdir("..");
+            }
+            else
+            {
+                continue;
+            }
+            
+            
         }
         else
         {
@@ -169,7 +175,7 @@ void *getImg(void *arg)
                 // printf("file: %s\n", entry_src);
                 linklist new = new_node(entry_src);
                 list_add_tail(&new->list, &head->list);
-                printf("%d %s\n", ++sum ,entry_src);
+                printf("%d %s\n", ++sum, entry_src);
             }
         }
         ep = readdir(dp);
@@ -178,29 +184,41 @@ void *getImg(void *arg)
     closedir(dp);
 }
 
+void *getImg(void *arg)
+{
+    printf("\nbegin search Img\n");
+    char *src = (char *)arg;
+    searchImg(src);
+    printf("\nsearch Img done\n");
+}
+
 void showbitmap(bitmap *bm, int x, int y, char *p)
 {
-    p += x*4 + y * 800*4;
+    p += x * 4 + y * 800 * 4;
     for (int j = 0; j < bm->height; j++)
     {
         for (int i = 0; i < bm->width; i++)
-            memcpy(p + i*4 + 800 * j*4, bm->map + i * 4 + bm->width * j * 4, 4);
+            memcpy(p + i * 4 + 800 * j * 4, bm->map + i * 4 + bm->width * j * 4, 4);
     }
 
     bzero(bm->map, bm->width * bm->height * bm->byteperpixel);
 }
 
-int main(int argc,char **argv)
+int main(int argc, char **argv)
 {
-    if (argc!=2)
+    if (!(argc == 2 || (argc == 3 && !strcmp(argv[2], "-r"))))
     {
-       perror("参数有误");
-       exit(0);
+        printf("参数有误");
+        exit(0);
     }
-    
+
+    //判断是否递归
+    if (argc == 3)
+        recursion = 1;
+
     head = init_list();
     pthread_t thread_getImg;
-    pthread_create(&thread_getImg,NULL,getImg,(void*)argv[1]);
+    pthread_create(&thread_getImg, NULL, getImg, (void *)argv[1]);
 
     int lcd = open("/dev/fb0", O_RDWR);
     char *p = mmap(NULL, 800 * 480 * 4 * 3, PROT_WRITE | PROT_READ, MAP_SHARED, lcd, 0);
@@ -213,6 +231,9 @@ int main(int argc,char **argv)
         return -1;
     }
 
+    // 显示标语
+    int red = 0xff000000;
+    int black = 0x0;
     font *f1 = fontLoad("simfang.ttf");
     fontSetSize(f1, 55);
     bitmap *Lwho;
@@ -221,17 +242,18 @@ int main(int argc,char **argv)
     showbitmap(Lwho, 0, 210, p);
 
     fontPrint(f1, Lwho, 50, 0, "无正确格式的照片,正在退出……", red, 0);
-    while (&head->list==head->list.next)
+    while (&head->list == head->list.next)
     {
-        if(pthread_tryjoin_np(thread_getImg, NULL)==0);
+        if (pthread_tryjoin_np(thread_getImg, NULL) == 0)
+            ;
         {
             showbitmap(Lwho, 0, 210, p);
             sleep(2);
-            memset(p  , 0, 800 * 480 * 4);
+            memset(p, 0, 800 * 480 * 4);
             exit(0);
         }
     }
-    
+
     // 分别加载三张图片到显存
     linklist pos = list_entry(&(head->list), typeof(*pos), list);
     for (int i = 0; i < 3; i++)
@@ -255,9 +277,9 @@ int main(int argc,char **argv)
             pos = list_entry(pos->list.next->next, typeof(*pos), list);
             if (pos == head)
                 pos = list_entry(pos->list.next, typeof(*pos), list);
-            // printf("%s\n", pos->img_path);
+            printf("\n<<<<<<<<<<<\n%s", pos->img_path);
 
-            //更新三个显存的位置
+            // 更新三个显存的位置
             tmp_now = now;
             now = next;
             next = prev;
@@ -273,7 +295,7 @@ int main(int argc,char **argv)
             pos = list_entry(pos->list.prev->prev, typeof(*pos), list);
             if (pos == head)
                 pos = list_entry(pos->list.prev, typeof(*pos), list);
-            // printf("%s\n", pos->img_path);
+            printf("\n>>>>>>>>>>\n%s", pos->img_path);
             tmp_now = now;
             now = prev;
             prev = next;
@@ -283,9 +305,9 @@ int main(int argc,char **argv)
             load_image(pos, p, prev);
             pos = list_entry(pos->list.next, typeof(*pos), list);
         }
-        else if (s == 3)//退出程序
+        else if (s == 3) // 退出程序
         {
-            memset(p + 800 * 480 * 4 * now, 0, 800 * 480 * 4);
+            memset(p, 0, 800 * 480 * 4 * 3);
             varinfo.yoffset = 0;
             ioctl(lcd, FBIOPAN_DISPLAY, &varinfo);
             break;
