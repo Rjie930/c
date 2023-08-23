@@ -18,8 +18,6 @@ else
     int stat;
     wait(&stat);
         printf("susce:%d\n",WTERMSIG(stat));
-
-    
 }
 
 
