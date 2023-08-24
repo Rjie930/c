@@ -18,10 +18,20 @@ struct msgbuf
 int main(int argc, char const *argv[])
 {
     key_t key = ftok(PATH, ID);
-    int id = msgget(key, IPC_CREAT | IPC_EXCL | 0666);
+    int id = msgget(key, IPC_CREAT  | 0666);
     struct msgbuf buf;
+    buf.id = 1;
+    strcpy(buf.data, "6");
+
+    int sum=1;
+    // while (1)
+    // {
+            msgsnd(id, &buf, sizeof(buf.data), 0);
+            sum++;
+            printf("%d\n",sum);
+            // usleep(1000*100);
+    // }
     
-    msgsnd(id, &buf, sizeof(buf));
 
     return 0;
 }

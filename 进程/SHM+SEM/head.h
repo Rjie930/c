@@ -1,8 +1,8 @@
 /*
  * @Author: vincent
- * @Date: 2023-08-24 11:22:59
- * @LastEditors: veincent
- * @LastEditTime: 2023-08-24 11:42:52
+ * @Date: 2023-08-24 11:28:45
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-08-24 02:20:08
  * @Description: 
  */
 #include <stdio.h>
@@ -23,17 +23,14 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <pwd.h>
-#include "head.h"
 
-int main()
-{
-    // 创建消息队列IPC对象
-    key_t key = ftok(PROJ_PATH, PROJ_ID);
-    int id = msgget(key, IPC_CREAT|0666);
+#define PROJ_PATH "."
+#define PROJ_ID_SHM   1
+#define PROJ_ID_SEM   2
 
-    // 从消息队列接收消息
-    struct msgbuf buf;
-    msgrcv(id, &buf, sizeof(buf.data), JACK2ROSE, 0);
+#define DATA 0 // 第0个信号量元素代表数据
 
-    printf("data: %s\n", buf.data);
-}
+
+void sem_init(int id, int semnum, int val);
+int sem_v(int id, int semnum);
+int sem_p(int id, int semnum);
