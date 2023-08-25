@@ -7,31 +7,30 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <signal.h>
 
-void clean(int sig)
+#include <pthread.h>
+
+int global = 100;
+
+void *isPrime(void *arg)
 {
-    wait(NULL);
-    printf("clean\n");
-}
-int main(int argc,char **argv)
-{
-    // kill(atoi(argv[1]),SIGSEGV);
-    // signal(SIGCHLD, clean);
-    // if (fork() == 0)
-    //     return 0;
-    // pause();
-    // sigset_t sig;
-    // sigemptyset(&sig);
-    // sigaddset(&sig,SIGHUP);
-    // sigaddset(&sig,SIGINT);
-    // sigprocmask(SIG_SETMASK,&sig,NULL);
-    // printf("self:%d\n",getpid());
-    signal(SIGINT,SIG_IGN);
-    while (1)
+    while(1)
     {
-        
+        // 一段朴素的代码
+        if(global%2 == 0)
+        if(1)
+        if(1)
+        if(1)
+            printf("%d是偶数\n", global);
     }
-    
-    return 0;
+}
+
+int main()
+{
+    pthread_t tid;
+    pthread_create(&tid, NULL, isPrime, NULL);
+
+    // 一条人畜无害的赋值语句
+    while(1)
+        global = rand() % 5000;
 }
