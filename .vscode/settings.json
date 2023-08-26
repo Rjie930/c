@@ -27,6 +27,9 @@
         "*.tcc": "c",
         "fstream": "c",
         "kernel_list.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "msg.h": "c",
+        "string.h": "c",
+        "shm.h": "c"
     }
 }
