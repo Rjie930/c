@@ -30,6 +30,9 @@
         "math.h": "c",
         "msg.h": "c",
         "string.h": "c",
-        "shm.h": "c"
+        "shm.h": "c",
+        "truetype.h": "c",
+        "font.h": "c",
+        "ioctl.h": "c"
     }
 }

@@ -1,4 +1,5 @@
 #include "head.h"
+#include <sys/sem.h>
 
 void sem_init(int id, int semnum, int val)
 {
@@ -22,7 +23,7 @@ int sem_v(int id, int semnum)
     buf[0].sem_op = +1;
     buf[0].sem_flg = 0;
 
-    return semop(id, buf, q);
+    return semop(id, buf, 1);
 }
 
 int sem_p(int id, int semnum)

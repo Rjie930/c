@@ -17,21 +17,25 @@ struct msgbuf
 
 int main(int argc, char const *argv[])
 {
+    int pid = getpid();
     key_t key = ftok(PATH, ID);
-    int id = msgget(key, IPC_CREAT  | 0666);
+    int id = msgget(key, IPC_CREAT | 0666);
     struct msgbuf buf;
-    buf.id = 1;
-    strcpy(buf.data, "6");
 
-    int sum=1;
-    // while (1)
-    // {
+    if (fork() == 0)
+    {
+        while (1)
+        {
+            msgrcv(id, &buf, sizeof(buf), 0, 0);
+            printf("接收:%s\n", buf.data);
+        }
+    }
+    else
+        while (1)
+        {
+            fgets(buf.data, 20, stdin);
             msgsnd(id, &buf, sizeof(buf.data), 0);
-            sum++;
-            printf("%d\n",sum);
-            // usleep(1000*100);
-    // }
-    
+        }
 
-    return 0;
+        return 0;
 }
