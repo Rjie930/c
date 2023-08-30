@@ -1,8 +1,4 @@
-/*
- * @Author: vincent
- * @Date: 2023-08-29 00:16:27
- * @LastEditTime: 2023-08-29 00:44:28
- */
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
