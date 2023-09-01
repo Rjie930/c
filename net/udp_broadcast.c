@@ -40,7 +40,7 @@ void *broadcast(void *arg)
     bzero(&peeraddr, len);
 
     peeraddr.sin_family = AF_INET;
-    peeraddr.sin_addr.s_addr = inet_addr("192.168.189.255") ; // 2. 收件人地址写广播地址
+    peeraddr.sin_addr.s_addr = inet_addr("192.168.16.255") ; // 2. 收件人地址写广播地址
     peeraddr.sin_port = htons(50001);
 
     char msg[BUFSIZE];
