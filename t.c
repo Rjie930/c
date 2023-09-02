@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -23,32 +22,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 int main(int argc, char const *argv[])
 {
-    // 创建一个UDP通信端点（套接字/套接口）
-    int sockfd = socket(AF_INET,    /*使用IPv4做网际通信*/
-                        SOCK_DGRAM, /*使用数据报方式收发数据（帧同步）*/
-                        0 /*使用数据报的默认协议，即UDP*/);
+    struct hostent *host;
+    host = gethostbyname("www.baidu.com");
 
-    // 定义IPv4地址结构体，并存放好对方的地址
-    struct sockaddr_in addr;
-    socklen_t len = sizeof(addr);
-    bzero(&addr, len);
-
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("192.168.16.133");
-    addr.sin_port = htons(50001); // host to network short
-
-    // 给对方发数据
-    char buf[100];
-    while (1)
+    if (host != NULL)
     {
-        bzero(buf, 100);
-        fgets(buf, 100, stdin);
-
-        sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr *)&addr, len);
+        for(int i=0; host->h_addr_list[i] != NULL; i++)
+        printf("%s\n",inet_ntoa(*(struct in_addr*)host->h_addr_list[i]));
     }
+    
 
     return 0;
 }
