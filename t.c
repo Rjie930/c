@@ -35,6 +35,5 @@ int main(int argc, char const *argv[])
         printf("%s\n",inet_ntoa(*(struct in_addr*)host->h_addr_list[i]));
     }
     
-
     return 0;
 }
