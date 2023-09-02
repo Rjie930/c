@@ -50,18 +50,29 @@ int main(int argc, char const *argv[])  // ./tcpSnd IP
 
         // 监测sockfd和标准输入的读就绪状态
         FD_SET(sockfd, &rset);
+        FD_SET(sockfd, &eset);
         FD_SET(STDIN_FILENO, &rset);
 
         int n = select(sockfd+1, &rset, &wset, &eset, NULL);
 
 
         char buf[BUFSIZE];
-        if(FD_ISSET(sockfd, &rset)) // 对端发来了数据
+        if (FD_ISSET(sockfd, &rset)) // 对端发来了数据
         {
-            int n = read(sockfd, buf, 100);
-            if(n == 0)
+            bzero(buf, BUFSIZE);
+            int n = recv(sockfd, buf, 8, MSG_OOB);
+            if (n == 0)
                 break;
-            printf("收到:%s", buf);
+            printf("收到OOB:%s\n", buf);
+        }
+
+        if (FD_ISSET(sockfd, &eset)) // 对端发来了数据
+        {
+            bzero(buf, BUFSIZE);
+            int n = read(sockfd, buf, 100);
+            if (n == 0)
+                break;
+            printf("收到:%s\n", buf);
         }
 
         if(FD_ISSET(STDIN_FILENO, &rset)) // 标准输入（键盘）有数据

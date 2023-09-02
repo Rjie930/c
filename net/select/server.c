@@ -78,6 +78,7 @@ int main(int argc, char const *argv[])
                 }
                 printf("收到客户端消息：%s\n", buf);
                 write(fds[i], buf, n);
+                send(fds[i], "OOO_BBB", 8, MSG_OOB);
             }
         }
     }

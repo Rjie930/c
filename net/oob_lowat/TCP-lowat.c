@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     int on = 1;
+    // 设置端口复用
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 
     int rcvLowat = 0;
