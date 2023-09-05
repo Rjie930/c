@@ -33,6 +33,8 @@
         "shm.h": "c",
         "truetype.h": "c",
         "font.h": "c",
-        "ioctl.h": "c"
+        "ioctl.h": "c",
+        "inet.h": "c",
+        "sockaddr.h": "c"
     }
 }
