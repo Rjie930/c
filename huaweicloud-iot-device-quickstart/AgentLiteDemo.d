@@ -89,10 +89,7 @@ AgentLiteDemo.o: AgentLiteDemo.c /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
  /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
- include/agentlite/iota_error_type.h /usr/include/stdlib.h \
- /usr/include/x86_64-linux-gnu/bits/waitflags.h \
- /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/alloca.h \
- /usr/include/x86_64-linux-gnu/bits/stdlib-float.h
+ include/agentlite/iota_error_type.h
 
 /usr/include/stdc-predef.h:
 
@@ -305,13 +302,3 @@ include/third_party/cjson/cJSON.h:
 /usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
 
 include/agentlite/iota_error_type.h:
-
-/usr/include/stdlib.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/alloca.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
